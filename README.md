@@ -47,7 +47,7 @@ flask-precos-combustivel/
 
 ### 1. Clone o Repositório
 ```bash
-git clone https://github.com/seu-usuario/flask-precos-combustivel.git
+git clone https://github.com/jpversiani/flask-precos-combustivel.git
 cd flask-precos-combustivel
 ```
 
