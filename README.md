@@ -183,8 +183,8 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 ## 👨‍💻 Autor
 
 **Seu Nome**
-- GitHub: [@seu-usuario](https://github.com/seu-usuario)
-- Email: seu.email@exemplo.com
+- GitHub: [@jpversiani](https://github.com/jpversiani)
+- Email: jpversiani@outlook.com
 
 ## 🙏 Agradecimentos
 
