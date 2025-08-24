@@ -64,29 +64,71 @@ python app.py
 ### 4. Acesse o Sistema
 Abra seu navegador e acesse: `http://localhost:5000`
 
-## 📱 Execução no Android (Termux)
+## 📱 Executar no Android (Termux)
 
-### 1. Instalar Termux
-- Baixe o Termux da F-Droid ou Google Play Store
+### 🚀 Instalação Automática (Recomendado)
 
-### 2. Configurar Ambiente
+**Método 1: Instalação em uma linha**
+```bash
+curl -fsSL https://raw.githubusercontent.com/jpversiani/flask-precos-combustivel/master/install_android.sh | bash
+```
+
+**Método 2: Download e execução manual**
+```bash
+# Baixar script de instalação
+wget https://raw.githubusercontent.com/jpversiani/flask-precos-combustivel/master/install_android.sh
+chmod +x install_android.sh
+./install_android.sh
+```
+
+### 📋 Pré-requisitos
+1. **Instalar Termux:**
+   - Baixe da [F-Droid](https://f-droid.org/packages/com.termux/) (recomendado)
+   - Ou da Google Play Store
+
+2. **Executar a instalação automática** (script faz tudo automaticamente):
+   - ✅ Atualiza pacotes do Termux
+   - ✅ Instala Python, Git, Pip
+   - ✅ Clona o repositório do GitHub
+   - ✅ Instala dependências Python
+   - ✅ Cria dados de exemplo
+   - ✅ Configura scripts de inicialização
+
+### 🎯 Após a Instalação
+```bash
+# Navegar para o projeto
+cd ~/projetos/flask-precos-combustivel
+
+# Iniciar servidor
+./start_server.sh
+
+# Acessar no navegador
+# http://localhost:5000
+```
+
+### 🌐 Configurar Acesso Externo
+```bash
+# Configurar ngrok (opcional)
+./setup_ngrok.sh
+```
+
+### 🔧 Instalação Manual (se preferir)
 ```bash
 # Atualizar pacotes
 pkg update && pkg upgrade
 
-# Instalar Python e Git
-pkg install python git
-pkg install python-pip
-```
+# Instalar dependências
+pkg install python git python-pip
 
-### 3. Clonar e Executar
-```bash
 # Clonar repositório
-git clone https://github.com/seu-usuario/flask-precos-combustivel.git
+git clone https://github.com/jpversiani/flask-precos-combustivel.git
 cd flask-precos-combustivel
 
-# Instalar dependências
+# Instalar dependências Python
 pip install -r requirements.txt
+
+# Criar dados de exemplo
+python popular_dados.py
 
 # Executar aplicação
 python app.py
