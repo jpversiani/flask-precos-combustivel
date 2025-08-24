@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Preços de Gasolina - Página Inicial{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-transparent">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">
+                        <i class="fas fa-gas-pump me-2"></i>
+                        Preços de Gasolina na Cidade
+                    </h2>
+                    <a href="{{ url_for('adicionar_preco') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Adicionar Preço
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if precos %}
+                    <div class="row">
+                        {% for preco in precos %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card price-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-gas-pump me-2 text-primary"></i>
+                                            {{ preco.posto }}
+                                        </h5>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ url_for('editar_preco', id=preco.id) }}">
+                                                        <i class="fas fa-edit me-2"></i>Editar
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <form method="POST" action="{{ url_for('deletar_preco', id=preco.id) }}" class="d-inline" onsubmit="return confirm('Tem certeza que deseja remover este preço?')">
+                                                        <button type="submit" class="dropdown-item text-danger">
+                                                            <i class="fas fa-trash me-2"></i>Remover
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="card-text text-muted mb-2">
+                                        <i class="fas fa-map-marker-alt me-2"></i>
+                                        {{ preco.endereco }}
+                                    </p>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-secondary">{{ preco.tipo_combustivel }}</span>
+                                        <span class="price-value">R$ {{ "%.2f"|format(preco.preco) }}</span>
+                                    </div>
+                                    
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Atualizado em {{ preco.data_atualizacao.strftime('%d/%m/%Y às %H:%M') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mt-4">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h5><i class="fas fa-arrow-down me-2"></i>Menor Preço</h5>
+                                        <h3>R$ {{ "%.2f"|format(precos[0].preco) }}</h3>
+                                        <small>{{ precos[0].posto }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body text-center">
+                                        <h5><i class="fas fa-calculator me-2"></i>Preço Médio</h5>
+                                        <h3>R$ {{ "%.2f"|format((precos|sum(attribute='preco')) / (precos|length)) }}</h3>
+                                        <small>Baseado em {{ precos|length }} postos</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-danger text-white">
+                                    <div class="card-body text-center">
+                                        <h5><i class="fas fa-arrow-up me-2"></i>Maior Preço</h5>
+                                        <h3>R$ {{ "%.2f"|format(precos[-1].preco) }}</h3>
+                                        <small>{{ precos[-1].posto }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-gas-pump fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Nenhum preço cadastrado ainda</h4>
+                        <p class="text-muted mb-4">Seja o primeiro a adicionar um preço de gasolina!</p>
+                        <a href="{{ url_for('adicionar_preco') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus me-2"></i>Adicionar Primeiro Preço
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto-refresh da página a cada 5 minutos
+    setTimeout(function(){
+        location.reload();
+    }, 300000);
+    
+    // Animação suave para os cards
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.price-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Tabela de Dados - Preços de Combustível{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-table me-2"></i>Tabela Completa de Preços</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Filtros -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <label for="filtroTipo" class="form-label">Filtrar por Combustível:</label>
+                            <select class="form-select" id="filtroTipo">
+                                <option value="">Todos os tipos</option>
+                                <option value="Gasolina Comum">Gasolina Comum</option>
+                                <option value="Gasolina Aditivada">Gasolina Aditivada</option>
+                                <option value="Etanol">Etanol</option>
+                                <option value="Diesel">Diesel</option>
+                                <option value="Diesel S-10">Diesel S-10</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filtroPosto" class="form-label">Buscar por Posto:</label>
+                            <input type="text" class="form-control" id="filtroPosto" placeholder="Digite o nome do posto...">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filtroPreco" class="form-label">Ordenar por:</label>
+                            <select class="form-select" id="filtroPreco">
+                                <option value="preco-asc">Menor Preço</option>
+                                <option value="preco-desc">Maior Preço</option>
+                                <option value="posto-asc">Nome do Posto (A-Z)</option>
+                                <option value="data-desc">Mais Recente</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Estatísticas Rápidas -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Total de Registros</h5>
+                                    <h3 id="totalRegistros">{{ precos|length }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Postos Únicos</h5>
+                                    <h3 id="totalPostos">{{ precos|map(attribute='posto')|unique|list|length }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Menor Preço</h5>
+                                    <h3 id="menorPreco">R$ {{ "%.2f"|format(precos|map(attribute='preco')|min) if precos else "0.00" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Maior Preço</h5>
+                                    <h3 id="maiorPreco">R$ {{ "%.2f"|format(precos|map(attribute='preco')|max) if precos else "0.00" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="tabelaPrecos">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th><i class="fas fa-hashtag"></i> ID</th>
+                                    <th><i class="fas fa-gas-pump"></i> Posto</th>
+                                    <th><i class="fas fa-map-marker-alt"></i> Endereço</th>
+                                    <th><i class="fas fa-tint"></i> Combustível</th>
+                                    <th><i class="fas fa-dollar-sign"></i> Preço</th>
+                                    <th><i class="fas fa-clock"></i> Última Atualização</th>
+                                    <th><i class="fas fa-cogs"></i> Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for preco in precos %}
+                                <tr data-tipo="{{ preco.tipo_combustivel }}" data-posto="{{ preco.posto.lower() }}" data-preco="{{ preco.preco }}" data-data="{{ preco.data_atualizacao.strftime('%Y%m%d%H%M%S') }}">
+                                    <td><span class="badge bg-secondary">{{ preco.id }}</span></td>
+                                    <td><strong>{{ preco.posto }}</strong></td>
+                                    <td><small class="text-muted">{{ preco.endereco }}</small></td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if preco.tipo_combustivel == 'Gasolina Comum' %}bg-primary
+                                            {% elif preco.tipo_combustivel == 'Gasolina Aditivada' %}bg-info
+                                            {% elif preco.tipo_combustivel == 'Etanol' %}bg-success
+                                            {% elif preco.tipo_combustivel == 'Diesel' %}bg-warning
+                                            {% else %}bg-dark{% endif %}">
+                                            {{ preco.tipo_combustivel }}
+                                        </span>
+                                    </td>
+                                    <td><strong class="text-success">R$ {{ "%.2f"|format(preco.preco) }}</strong></td>
+                                    <td><small>{{ preco.data_atualizacao.strftime('%d/%m/%Y %H:%M') }}</small></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{{ url_for('editar_preco', id=preco.id) }}" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button class="btn btn-outline-danger btn-sm" onclick="confirmarExclusao({{ preco.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if not precos %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-database fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Nenhum preço cadastrado</h4>
+                        <p class="text-muted">Comece adicionando alguns preços de combustível.</p>
+                        <a href="{{ url_for('adicionar_preco') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Adicionar Primeiro Preço
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Filtros e ordenação
+document.addEventListener('DOMContentLoaded', function() {
+    const filtroTipo = document.getElementById('filtroTipo');
+    const filtroPosto = document.getElementById('filtroPosto');
+    const filtroPreco = document.getElementById('filtroPreco');
+    const tabela = document.getElementById('tabelaPrecos');
+    const tbody = tabela.querySelector('tbody');
+    const linhas = Array.from(tbody.querySelectorAll('tr'));
+
+    function aplicarFiltros() {
+        const tipoSelecionado = filtroTipo.value.toLowerCase();
+        const postoDigitado = filtroPosto.value.toLowerCase();
+        const ordenacao = filtroPreco.value;
+
+        // Filtrar linhas
+        let linhasFiltradas = linhas.filter(linha => {
+            const tipo = linha.dataset.tipo.toLowerCase();
+            const posto = linha.dataset.posto;
+            
+            const passaTipo = !tipoSelecionado || tipo.includes(tipoSelecionado.toLowerCase());
+            const passaPosto = !postoDigitado || posto.includes(postoDigitado);
+            
+            return passaTipo && passaPosto;
+        });
+
+        // Ordenar linhas
+        linhasFiltradas.sort((a, b) => {
+            switch(ordenacao) {
+                case 'preco-asc':
+                    return parseFloat(a.dataset.preco) - parseFloat(b.dataset.preco);
+                case 'preco-desc':
+                    return parseFloat(b.dataset.preco) - parseFloat(a.dataset.preco);
+                case 'posto-asc':
+                    return a.dataset.posto.localeCompare(b.dataset.posto);
+                case 'data-desc':
+                    return b.dataset.data.localeCompare(a.dataset.data);
+                default:
+                    return 0;
+            }
+        });
+
+        // Limpar e repovoar tabela
+        tbody.innerHTML = '';
+        linhasFiltradas.forEach(linha => {
+            linha.style.display = '';
+            tbody.appendChild(linha);
+        });
+
+        // Atualizar estatísticas
+        atualizarEstatisticas(linhasFiltradas);
+    }
+
+    function atualizarEstatisticas(linhas) {
+        const totalRegistros = linhas.length;
+        const postos = new Set(linhas.map(linha => linha.dataset.posto));
+        const precos = linhas.map(linha => parseFloat(linha.dataset.preco));
+        
+        document.getElementById('totalRegistros').textContent = totalRegistros;
+        document.getElementById('totalPostos').textContent = postos.size;
+        
+        if (precos.length > 0) {
+            document.getElementById('menorPreco').textContent = 'R$ ' + Math.min(...precos).toFixed(2);
+            document.getElementById('maiorPreco').textContent = 'R$ ' + Math.max(...precos).toFixed(2);
+        } else {
+            document.getElementById('menorPreco').textContent = 'R$ 0.00';
+            document.getElementById('maiorPreco').textContent = 'R$ 0.00';
+        }
+    }
+
+    // Event listeners
+    filtroTipo.addEventListener('change', aplicarFiltros);
+    filtroPosto.addEventListener('input', aplicarFiltros);
+    filtroPreco.addEventListener('change', aplicarFiltros);
+});
+
+// Função para confirmar exclusão
+function confirmarExclusao(id) {
+    if (confirm('Tem certeza que deseja excluir este preço?')) {
+        fetch(`/deletar/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Erro ao excluir o preço.');
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao excluir o preço.');
+        });
+    }
+}
+</script>
+{% endblock %}

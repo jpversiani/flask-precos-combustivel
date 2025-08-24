@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Preço - Preços de Gasolina{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header bg-transparent">
+                <h3 class="mb-0">
+                    <i class="fas fa-edit me-2"></i>
+                    Editar Preço
+                </h3>
+                <small class="text-muted">Atualizando informações do {{ preco.posto }}</small>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="editarForm">
+                    <div class="mb-3">
+                        <label for="posto" class="form-label">
+                            <i class="fas fa-gas-pump me-2"></i>
+                            Nome do Posto *
+                        </label>
+                        <input type="text" class="form-control" id="posto" name="posto" 
+                               value="{{ preco.posto }}" required 
+                               placeholder="Ex: Posto Ipiranga Centro">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="endereco" class="form-label">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            Endereço *
+                        </label>
+                        <input type="text" class="form-control" id="endereco" name="endereco" 
+                               value="{{ preco.endereco }}" required 
+                               placeholder="Ex: Rua das Flores, 123 - Centro">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="preco" class="form-label">
+                                    <i class="fas fa-dollar-sign me-2"></i>
+                                    Preço (R$) *
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" class="form-control" id="preco" name="preco" 
+                                           value="{{ preco.preco }}" step="0.01" min="0" max="20" required 
+                                           placeholder="5.49">
+                                </div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="tipo_combustivel" class="form-label">
+                                    <i class="fas fa-tint me-2"></i>
+                                    Tipo de Combustível
+                                </label>
+                                <select class="form-select" id="tipo_combustivel" name="tipo_combustivel">
+                                    <option value="Gasolina Comum" {{ 'selected' if preco.tipo_combustivel == 'Gasolina Comum' }}>Gasolina Comum</option>
+                                    <option value="Gasolina Aditivada" {{ 'selected' if preco.tipo_combustivel == 'Gasolina Aditivada' }}>Gasolina Aditivada</option>
+                                    <option value="Etanol" {{ 'selected' if preco.tipo_combustivel == 'Etanol' }}>Etanol</option>
+                                    <option value="Diesel" {{ 'selected' if preco.tipo_combustivel == 'Diesel' }}>Diesel</option>
+                                    <option value="Diesel S-10" {{ 'selected' if preco.tipo_combustivel == 'Diesel S-10' }}>Diesel S-10</option>
+                                    <option value="GNV" {{ 'selected' if preco.tipo_combustivel == 'GNV' }}>GNV</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Atenção:</strong> Ao salvar, a data de atualização será alterada para agora.
+                        <br><small>Última atualização: {{ preco.data_atualizacao.strftime('%d/%m/%Y às %H:%M') }}</small>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary me-md-2">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-save me-2"></i>
+                            Atualizar Preço
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Card com histórico -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-history me-2 text-info"></i>
+                    Informações do Registro
+                </h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <strong>ID:</strong> #{{ preco.id }}
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <strong>Última atualização:</strong><br>
+                            {{ preco.data_atualizacao.strftime('%d/%m/%Y às %H:%M') }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editarForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Armazenar valores originais para detectar mudanças
+    const originalValues = {
+        posto: document.getElementById('posto').value,
+        endereco: document.getElementById('endereco').value,
+        preco: document.getElementById('preco').value,
+        tipo_combustivel: document.getElementById('tipo_combustivel').value
+    };
+    
+    // Validação em tempo real
+    const inputs = form.querySelectorAll('input[required]');
+    
+    inputs.forEach(input => {
+        input.addEventListener('blur', validateField);
+        input.addEventListener('input', function() {
+            clearValidation(this);
+            checkForChanges();
+        });
+    });
+    
+    document.getElementById('tipo_combustivel').addEventListener('change', checkForChanges);
+    
+    function validateField(e) {
+        const field = e.target;
+        const value = field.value.trim();
+        
+        // Remove validação anterior
+        field.classList.remove('is-invalid', 'is-valid');
+        
+        if (!value) {
+            field.classList.add('is-invalid');
+            field.nextElementSibling.textContent = 'Este campo é obrigatório.';
+            return false;
+        }
+        
+        // Validações específicas
+        if (field.name === 'preco') {
+            const preco = parseFloat(value);
+            if (preco <= 0 || preco > 20) {
+                field.classList.add('is-invalid');
+                field.nextElementSibling.textContent = 'Preço deve estar entre R$ 0,01 e R$ 20,00.';
+                return false;
+            }
+        }
+        
+        if (field.name === 'posto' && value.length < 3) {
+            field.classList.add('is-invalid');
+            field.nextElementSibling.textContent = 'Nome do posto deve ter pelo menos 3 caracteres.';
+            return false;
+        }
+        
+        if (field.name === 'endereco' && value.length < 10) {
+            field.classList.add('is-invalid');
+            field.nextElementSibling.textContent = 'Endereço deve ser mais detalhado.';
+            return false;
+        }
+        
+        field.classList.add('is-valid');
+        return true;
+    }
+    
+    function clearValidation(field) {
+        field.classList.remove('is-invalid', 'is-valid');
+    }
+    
+    function checkForChanges() {
+        const currentValues = {
+            posto: document.getElementById('posto').value,
+            endereco: document.getElementById('endereco').value,
+            preco: document.getElementById('preco').value,
+            tipo_combustivel: document.getElementById('tipo_combustivel').value
+        };
+        
+        const hasChanges = Object.keys(originalValues).some(key => 
+            originalValues[key] !== currentValues[key]
+        );
+        
+        if (hasChanges) {
+            submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>Atualizar Preço';
+            submitBtn.classList.remove('btn-outline-primary');
+            submitBtn.classList.add('btn-primary');
+        } else {
+            submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>Sem Alterações';
+            submitBtn.classList.remove('btn-primary');
+            submitBtn.classList.add('btn-outline-primary');
+        }
+    }
+    
+    // Validação no envio do formulário
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        inputs.forEach(input => {
+            if (!validateField({target: input})) {
+                isValid = false;
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            return;
+        }
+        
+        // Animação do botão durante envio
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Atualizando...';
+        submitBtn.disabled = true;
+    });
+    
+    // Formatação automática do preço
+    const precoInput = document.getElementById('preco');
+    precoInput.addEventListener('input', function(e) {
+        let value = e.target.value;
+        // Remove caracteres não numéricos exceto ponto e vírgula
+        value = value.replace(/[^0-9.,]/g, '');
+        // Substitui vírgula por ponto
+        value = value.replace(',', '.');
+        e.target.value = value;
+    });
+    
+    // Verificar mudanças iniciais
+    checkForChanges();
+});
+</script>
+{% endblock %}

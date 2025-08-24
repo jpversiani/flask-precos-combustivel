@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Adicionar Preço - Preços de Gasolina{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header bg-transparent">
+                <h3 class="mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Adicionar Novo Preço
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="precoForm">
+                    <div class="mb-3">
+                        <label for="posto" class="form-label">
+                            <i class="fas fa-gas-pump me-2"></i>
+                            Nome do Posto *
+                        </label>
+                        <input type="text" class="form-control" id="posto" name="posto" required 
+                               placeholder="Ex: Posto Ipiranga Centro">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="endereco" class="form-label">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            Endereço *
+                        </label>
+                        <input type="text" class="form-control" id="endereco" name="endereco" required 
+                               placeholder="Ex: Rua das Flores, 123 - Centro">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="preco" class="form-label">
+                                    <i class="fas fa-dollar-sign me-2"></i>
+                                    Preço (R$) *
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" class="form-control" id="preco" name="preco" 
+                                           step="0.01" min="0" max="20" required 
+                                           placeholder="5.49">
+                                </div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="tipo_combustivel" class="form-label">
+                                    <i class="fas fa-tint me-2"></i>
+                                    Tipo de Combustível
+                                </label>
+                                <select class="form-select" id="tipo_combustivel" name="tipo_combustivel">
+                                    <option value="Gasolina Comum" selected>Gasolina Comum</option>
+                                    <option value="Gasolina Aditivada">Gasolina Aditivada</option>
+                                    <option value="Etanol">Etanol</option>
+                                    <option value="Diesel">Diesel</option>
+                                    <option value="Diesel S-10">Diesel S-10</option>
+                                    <option value="GNV">GNV</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Dica:</strong> Verifique se o preço está correto antes de enviar. 
+                        Preços muito diferentes da média podem ser questionados.
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary me-md-2">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Voltar
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-save me-2"></i>
+                            Salvar Preço
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Card com dicas -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-lightbulb me-2 text-warning"></i>
+                    Dicas para um bom cadastro
+                </h6>
+                <ul class="list-unstyled mb-0">
+                    <li><i class="fas fa-check text-success me-2"></i>Use o nome completo do posto</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Inclua bairro ou referência no endereço</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Verifique o preço antes de cadastrar</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Selecione o tipo correto de combustível</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('precoForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Validação em tempo real
+    const inputs = form.querySelectorAll('input[required]');
+    
+    inputs.forEach(input => {
+        input.addEventListener('blur', validateField);
+        input.addEventListener('input', clearValidation);
+    });
+    
+    function validateField(e) {
+        const field = e.target;
+        const value = field.value.trim();
+        
+        // Remove validação anterior
+        field.classList.remove('is-invalid', 'is-valid');
+        
+        if (!value) {
+            field.classList.add('is-invalid');
+            field.nextElementSibling.textContent = 'Este campo é obrigatório.';
+            return false;
+        }
+        
+        // Validações específicas
+        if (field.name === 'preco') {
+            const preco = parseFloat(value);
+            if (preco <= 0 || preco > 20) {
+                field.classList.add('is-invalid');
+                field.nextElementSibling.textContent = 'Preço deve estar entre R$ 0,01 e R$ 20,00.';
+                return false;
+            }
+        }
+        
+        if (field.name === 'posto' && value.length < 3) {
+            field.classList.add('is-invalid');
+            field.nextElementSibling.textContent = 'Nome do posto deve ter pelo menos 3 caracteres.';
+            return false;
+        }
+        
+        if (field.name === 'endereco' && value.length < 10) {
+            field.classList.add('is-invalid');
+            field.nextElementSibling.textContent = 'Endereço deve ser mais detalhado.';
+            return false;
+        }
+        
+        field.classList.add('is-valid');
+        return true;
+    }
+    
+    function clearValidation(e) {
+        const field = e.target;
+        field.classList.remove('is-invalid', 'is-valid');
+    }
+    
+    // Validação no envio do formulário
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        inputs.forEach(input => {
+            if (!validateField({target: input})) {
+                isValid = false;
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            return;
+        }
+        
+        // Animação do botão durante envio
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+        submitBtn.disabled = true;
+    });
+    
+    // Formatação automática do preço
+    const precoInput = document.getElementById('preco');
+    precoInput.addEventListener('input', function(e) {
+        let value = e.target.value;
+        // Remove caracteres não numéricos exceto ponto e vírgula
+        value = value.replace(/[^0-9.,]/g, '');
+        // Substitui vírgula por ponto
+        value = value.replace(',', '.');
+        e.target.value = value;
+    });
+});
+</script>
+{% endblock %}

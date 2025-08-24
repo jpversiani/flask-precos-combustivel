@@ -1,0 +1,450 @@
+{% extends "base.html" %}
+
+{% block title %}Documentação da API - Preços de Combustível{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0"><i class="fas fa-code me-2"></i>Documentação da API REST</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Introdução -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Sobre a API</h5>
+                                <p class="mb-0">Esta API REST permite acessar e consultar dados de preços de combustível de forma programática. Todos os endpoints retornam dados em formato JSON.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- URL Base -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary"><i class="fas fa-link me-2"></i>URL Base</h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <code id="baseUrl">{{ request.url_root }}api/</code>
+                                    <button class="btn btn-sm btn-outline-secondary ms-2" onclick="copiarTexto('baseUrl')">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Endpoints -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary"><i class="fas fa-list me-2"></i>Endpoints Disponíveis</h5>
+                        </div>
+                    </div>
+
+                    <!-- Endpoint 1: Listar todos os preços -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <span class="badge bg-light text-success me-2">GET</span>
+                                /api/precos
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Descrição:</strong> Retorna todos os preços de combustível cadastrados, ordenados do menor para o maior preço.</p>
+                            
+                            <h6 class="mt-3">URL Completa:</h6>
+                            <div class="bg-light p-2 rounded">
+                                <code id="endpoint1">{{ request.url_root }}api/precos</code>
+                                <button class="btn btn-sm btn-outline-secondary ms-2" onclick="copiarTexto('endpoint1')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+
+                            <h6 class="mt-3">Exemplo de Resposta:</h6>
+                            <pre class="bg-dark text-light p-3 rounded"><code>[
+  {
+    "id": 1,
+    "posto": "Posto Ipiranga Centro",
+    "endereco": "Av. Coronel Prates, 123",
+    "preco": 5.45,
+    "tipo_combustivel": "Gasolina Comum",
+    "data_atualizacao": "2024-01-15T10:30:00"
+  },
+  {
+    "id": 2,
+    "posto": "Shell Select Major Lopes",
+    "endereco": "Av. Major Lopes, 456",
+    "preco": 5.52,
+    "tipo_combustivel": "Gasolina Aditivada",
+    "data_atualizacao": "2024-01-15T11:15:00"
+  }
+]</code></pre>
+
+                            <button class="btn btn-primary" onclick="testarEndpoint('/api/precos')">
+                                <i class="fas fa-play me-2"></i>Testar Endpoint
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Endpoint 2: Buscar preço por ID -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <span class="badge bg-light text-info me-2">GET</span>
+                                /api/precos/{id}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Descrição:</strong> Retorna os detalhes de um preço específico pelo seu ID.</p>
+                            
+                            <h6 class="mt-3">Parâmetros:</h6>
+                            <ul>
+                                <li><code>id</code> (integer): ID único do registro de preço</li>
+                            </ul>
+
+                            <h6 class="mt-3">URL Completa:</h6>
+                            <div class="bg-light p-2 rounded">
+                                <code id="endpoint2">{{ request.url_root }}api/precos/1</code>
+                                <button class="btn btn-sm btn-outline-secondary ms-2" onclick="copiarTexto('endpoint2')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+
+                            <h6 class="mt-3">Exemplo de Resposta:</h6>
+                            <pre class="bg-dark text-light p-3 rounded"><code>{
+  "id": 1,
+  "posto": "Posto Ipiranga Centro",
+  "endereco": "Av. Coronel Prates, 123",
+  "preco": 5.45,
+  "tipo_combustivel": "Gasolina Comum",
+  "data_atualizacao": "2024-01-15T10:30:00"
+}</code></pre>
+
+                            <div class="input-group mt-3" style="max-width: 300px;">
+                                <input type="number" class="form-control" id="precoId" placeholder="ID do preço" value="1">
+                                <button class="btn btn-primary" onclick="testarEndpointComId()">
+                                    <i class="fas fa-play me-2"></i>Testar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Endpoint 3: Buscar por tipo de combustível -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0">
+                                <span class="badge bg-light text-warning me-2">GET</span>
+                                /api/precos/tipo/{tipo_combustivel}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Descrição:</strong> Retorna todos os preços de um tipo específico de combustível.</p>
+                            
+                            <h6 class="mt-3">Parâmetros:</h6>
+                            <ul>
+                                <li><code>tipo_combustivel</code> (string): Tipo do combustível</li>
+                            </ul>
+
+                            <h6 class="mt-3">Tipos Disponíveis:</h6>
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <span class="badge bg-primary">Gasolina Comum</span>
+                                <span class="badge bg-info">Gasolina Aditivada</span>
+                                <span class="badge bg-success">Etanol</span>
+                                <span class="badge bg-warning text-dark">Diesel</span>
+                                <span class="badge bg-dark">Diesel S-10</span>
+                            </div>
+
+                            <h6 class="mt-3">URL Completa:</h6>
+                            <div class="bg-light p-2 rounded">
+                                <code id="endpoint3">{{ request.url_root }}api/precos/tipo/Gasolina%20Comum</code>
+                                <button class="btn btn-sm btn-outline-secondary ms-2" onclick="copiarTexto('endpoint3')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+
+                            <div class="input-group mt-3" style="max-width: 400px;">
+                                <select class="form-select" id="tipoCombustivel">
+                                    <option value="Gasolina Comum">Gasolina Comum</option>
+                                    <option value="Gasolina Aditivada">Gasolina Aditivada</option>
+                                    <option value="Etanol">Etanol</option>
+                                    <option value="Diesel">Diesel</option>
+                                    <option value="Diesel S-10">Diesel S-10</option>
+                                </select>
+                                <button class="btn btn-primary" onclick="testarEndpointPorTipo()">
+                                    <i class="fas fa-play me-2"></i>Testar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Endpoint 4: Estatísticas -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="mb-0">
+                                <span class="badge bg-light text-secondary me-2">GET</span>
+                                /api/estatisticas
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Descrição:</strong> Retorna estatísticas completas dos preços por tipo de combustível.</p>
+                            
+                            <h6 class="mt-3">URL Completa:</h6>
+                            <div class="bg-light p-2 rounded">
+                                <code id="endpoint4">{{ request.url_root }}api/estatisticas</code>
+                                <button class="btn btn-sm btn-outline-secondary ms-2" onclick="copiarTexto('endpoint4')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+
+                            <h6 class="mt-3">Exemplo de Resposta:</h6>
+                            <pre class="bg-dark text-light p-3 rounded"><code>{
+  "total_precos": 44,
+  "total_postos": 15,
+  "estatisticas_por_tipo": {
+    "Gasolina Comum": {
+      "count": 9,
+      "min": 5.21,
+      "max": 5.70,
+      "avg": 5.47
+    },
+    "Etanol": {
+      "count": 9,
+      "min": 3.83,
+      "max": 4.40,
+      "avg": 4.05
+    }
+  }
+}</code></pre>
+
+                            <button class="btn btn-primary" onclick="testarEndpoint('/api/estatisticas')">
+                                <i class="fas fa-play me-2"></i>Testar Endpoint
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Códigos de Status -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary"><i class="fas fa-exclamation-triangle me-2"></i>Códigos de Status HTTP</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Código</th>
+                                            <th>Status</th>
+                                            <th>Descrição</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="badge bg-success">200</span></td>
+                                            <td>OK</td>
+                                            <td>Requisição bem-sucedida</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge bg-warning text-dark">404</span></td>
+                                            <td>Not Found</td>
+                                            <td>Recurso não encontrado (ID inválido)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge bg-danger">500</span></td>
+                                            <td>Internal Server Error</td>
+                                            <td>Erro interno do servidor</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Exemplos de Uso -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary"><i class="fas fa-terminal me-2"></i>Exemplos de Uso</h5>
+                            
+                            <div class="accordion" id="exemploAccordion">
+                                <!-- JavaScript/Fetch -->
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingJS">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseJS">
+                                            <i class="fab fa-js-square me-2"></i>JavaScript (Fetch API)
+                                        </button>
+                                    </h2>
+                                    <div id="collapseJS" class="accordion-collapse collapse show" data-bs-parent="#exemploAccordion">
+                                        <div class="accordion-body">
+                                            <pre class="bg-dark text-light p-3 rounded"><code>// Buscar todos os preços
+fetch('{{ request.url_root }}api/precos')
+  .then(response => response.json())
+  .then(data => {
+    console.log('Preços:', data);
+  })
+  .catch(error => {
+    console.error('Erro:', error);
+  });
+
+// Buscar estatísticas
+fetch('{{ request.url_root }}api/estatisticas')
+  .then(response => response.json())
+  .then(stats => {
+    console.log('Estatísticas:', stats);
+  });</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Python -->
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingPython">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePython">
+                                            <i class="fab fa-python me-2"></i>Python (requests)
+                                        </button>
+                                    </h2>
+                                    <div id="collapsePython" class="accordion-collapse collapse" data-bs-parent="#exemploAccordion">
+                                        <div class="accordion-body">
+                                            <pre class="bg-dark text-light p-3 rounded"><code>import requests
+
+# Buscar todos os preços
+response = requests.get('{{ request.url_root }}api/precos')
+if response.status_code == 200:
+    precos = response.json()
+    print(f"Total de preços: {len(precos)}")
+    for preco in precos[:5]:  # Primeiros 5
+        print(f"{preco['posto']}: R$ {preco['preco']}")
+
+# Buscar preços de gasolina comum
+response = requests.get('{{ request.url_root }}api/precos/tipo/Gasolina%20Comum')
+if response.status_code == 200:
+    gasolina = response.json()
+    print(f"Preços de Gasolina Comum: {len(gasolina)} registros")</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- cURL -->
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingCurl">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCurl">
+                                            <i class="fas fa-terminal me-2"></i>cURL (Terminal)
+                                        </button>
+                                    </h2>
+                                    <div id="collapseCurl" class="accordion-collapse collapse" data-bs-parent="#exemploAccordion">
+                                        <div class="accordion-body">
+                                            <pre class="bg-dark text-light p-3 rounded"><code># Buscar todos os preços
+curl -X GET "{{ request.url_root }}api/precos" \
+     -H "Accept: application/json"
+
+# Buscar preço específico
+curl -X GET "{{ request.url_root }}api/precos/1" \
+     -H "Accept: application/json"
+
+# Buscar estatísticas
+curl -X GET "{{ request.url_root }}api/estatisticas" \
+     -H "Accept: application/json"
+
+# Buscar por tipo de combustível
+curl -X GET "{{ request.url_root }}api/precos/tipo/Etanol" \
+     -H "Accept: application/json"</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Testador de API -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary"><i class="fas fa-flask me-2"></i>Testador de API</h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <div id="apiTester">
+                                        <p class="text-muted">Clique em "Testar Endpoint" em qualquer endpoint acima para ver a resposta em tempo real.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <a href="{{ url_for('index') }}" class="btn btn-primary me-2">
+                                <i class="fas fa-home me-2"></i>Voltar ao Início
+                            </a>
+                            <a href="{{ url_for('tabela') }}" class="btn btn-info me-2">
+                                <i class="fas fa-table me-2"></i>Ver Tabela de Dados
+                            </a>
+                            <a href="{{ url_for('estatisticas') }}" class="btn btn-success">
+                                <i class="fas fa-chart-bar me-2"></i>Ver Estatísticas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Função para copiar texto
+function copiarTexto(elementId) {
+    const elemento = document.getElementById(elementId);
+    const texto = elemento.textContent;
+    
+    navigator.clipboard.writeText(texto).then(function() {
+        // Feedback visual
+        const botao = elemento.nextElementSibling;
+        const iconOriginal = botao.innerHTML;
+        botao.innerHTML = '<i class="fas fa-check"></i>';
+        botao.classList.remove('btn-outline-secondary');
+        botao.classList.add('btn-success');
+        
+        setTimeout(() => {
+            botao.innerHTML = iconOriginal;
+            botao.classList.remove('btn-success');
+            botao.classList.add('btn-outline-secondary');
+        }, 2000);
+    });
+}
+
+// Função para testar endpoints
+function testarEndpoint(endpoint) {
+    const tester = document.getElementById('apiTester');
+    tester.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>';
+    
+    fetch(endpoint)
+        .then(response => response.json())
+        .then(data => {
+            tester.innerHTML = `
+                <h6 class="text-success"><i class="fas fa-check-circle me-2"></i>Resposta de ${endpoint}</h6>
+                <pre class="bg-dark text-light p-3 rounded" style="max-height: 400px; overflow-y: auto;"><code>${JSON.stringify(data, null, 2)}</code></pre>
+            `;
+        })
+        .catch(error => {
+            tester.innerHTML = `
+                <h6 class="text-danger"><i class="fas fa-exclamation-circle me-2"></i>Erro ao testar ${endpoint}</h6>
+                <div class="alert alert-danger">${error.message}</div>
+            `;
+        });
+}
+
+// Função para testar endpoint com ID
+function testarEndpointComId() {
+    const id = document.getElementById('precoId').value;
+    if (id) {
+        testarEndpoint(`/api/precos/${id}`);
+    } else {
+        alert('Por favor, insira um ID válido.');
+    }
+}
+
+// Função para testar endpoint por tipo
+function testarEndpointPorTipo() {
+    const tipo = document.getElementById('tipoCombustivel').value;
+    const tipoEncoded = encodeURIComponent(tipo);
+    testarEndpoint(`/api/precos/tipo/${tipoEncoded}`);
+}
+</script>
+{% endblock %}
