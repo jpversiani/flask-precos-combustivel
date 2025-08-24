@@ -91,6 +91,8 @@ fi
 
 # Criar dados de exemplo
 print_status "Criando dados de exemplo..."
+echo "📊 Populando banco de dados com dados de exemplo..."
+echo "Criando tabelas e inserindo dados de exemplo..."
 if python popular_dados.py; then
     print_success "Dados de exemplo criados!"
 else

@@ -99,17 +99,21 @@ def gerar_data_aleatoria():
 def popular_banco_dados():
     """Popula o banco de dados com dados fictícios"""
     with app.app_context():
+        # Cria as tabelas se não existirem
+        print("Criando tabelas do banco de dados...")
+        db.create_all()
+        print("Tabelas criadas com sucesso!")
+        
         # Limpa dados existentes (opcional)
         print("Verificando dados existentes...")
         count_existing = PrecoGasolina.query.count()
         print(f"Encontrados {count_existing} registros existentes.")
         
         if count_existing > 0:
-            resposta = input("Deseja limpar os dados existentes? (s/n): ")
-            if resposta.lower() == 's':
-                PrecoGasolina.query.delete()
-                db.session.commit()
-                print("Dados existentes removidos.")
+            print(f"Removendo {count_existing} registros existentes...")
+            PrecoGasolina.query.delete()
+            db.session.commit()
+            print("Dados existentes removidos.")
         
         print("\nPopulando banco de dados com exemplos de Montes Claros...")
         
